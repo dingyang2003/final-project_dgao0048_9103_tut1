@@ -7,6 +7,8 @@ let fireflies = [];
 let noisePoints = [];
 
 let isNight = false;
+let isUpsideDown = false;
+
 let gravity = 0.2;
 let gravityDirection = 1;
 
@@ -15,7 +17,8 @@ let topY = 20;
 
 let scaleFactor;
 
-let isUpsideDown = false;
+let buttons = [];
+let corruptApples = false;
 
 class Segment {
   constructor(x, y, length, angle, level) {
@@ -101,11 +104,8 @@ class Apple {
   }
 
   draw() {
-    if (!isUpsideDown) {
-      fill(this.color);
-    } else {
-      fill(120 + sin(frameCount * 0.1) * 50, 0, 80);
-    }
+   if (!isUpsideDown && !corruptApples) fill(this.color);
+   else fill(150, 0, 80);
 
     stroke(isUpsideDown ? 80 : 255);
 
@@ -136,6 +136,32 @@ class Firefly {
     noStroke();
     fill(255,255,200,this.alpha);
     ellipse(this.x, this.y, 6, 6);
+  }
+}
+
+class UIButton {
+  constructor(x, y, w, h, label, callback) {
+    this.x = x; this.y = y;
+    this.w = w; this.h = h;
+    this.label = label;
+    this.callback = callback;
+  }
+
+  draw() {
+    fill(60,0,80,160);
+    stroke(255);
+    strokeWeight(2);
+    rect(this.x, this.y, this.w, this.h, 8);
+
+    fill(255);
+    noStroke();
+    textSize(18);
+    textAlign(CENTER, CENTER);
+    text(this.label, this.x + this.w/2, this.y + this.h/2);
+  }
+  isHovered(mx, my) {
+    return mx > this.x && mx < this.x + this.w &&
+           my > this.y && my < this.y + this.h;
   }
 }
 
@@ -182,14 +208,19 @@ function setup() {
   generateTree(300, 650, 200, PI/2, 1);
 
   for (let i = 0; i < 40; i++) fireflies.push(new Firefly());
+buttons.push(new UIButton(
+    200, 250, 200, 60,
+    "Corrupt Apples",
+    ()=>{ corruptApples = true; }
+  ));
 }
 
 function draw() {
-  if (!isUpsideDown) {
-    background(isNight ? color(20,30,60) : color(100,150,200));
-  } else {
-    background(20,10,30);
-  }
+  background(
+    isUpsideDown ? color(20,10,30) :
+    isNight ? color(20,30,60) :
+    color(100,150,200)
+  );
 
   push();
   scale(scaleFactor);
@@ -230,27 +261,49 @@ function draw() {
   apples.forEach(a => { a.update(); a.draw(); });
 
   if (!isUpsideDown && isNight) {
+fireflies.forEach(f => { f.update(); f.draw(); });
 
     fill(255,255,200,80);
     ellipse(520,100,80,80);
-
-    fireflies.forEach(f=>{
-      f.update();
-      f.draw();
-    });
   }
+   
+if (isUpsideDown) {
+    push();
+    scale(1, -1);
+    translate(0, -DESIGN_H);
 
-  pop();
+    buttons.forEach(b => b.draw());
+  
+    pop();
+}
+
+ pop();
 }
 
 function mousePressed() {
   let cx = mouseX / scaleFactor - (width/scaleFactor - DESIGN_W)/2;
   let cy = mouseY / scaleFactor - (height/scaleFactor - DESIGN_H)/2;
 
+  if (!isUpsideDown && cx > 250 && cx < 350 && cy > 400 && cy < 650) {
+    isUpsideDown = true;
+  }
+
+  if (isUpsideDown) {
+    let mx = cx;
+    let my = DESIGN_H - cy;
+
+    for (let b of buttons) {
+      if (b.isHovered(mx, my)) {
+        b.callback();
+        return;
+      }
+    }
+  }
+}
   if (cx > 250 && cx < 350 && cy > 400 && cy < 650) {
     isUpsideDown = !isUpsideDown;
   }
-}
+
 
 function keyPressed() {
   if (key === " ") { 
