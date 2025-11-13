@@ -20,6 +20,7 @@ let scaleFactor;
 let buttons = [];
 let corruptApples = false;
 
+
 class Segment {
   constructor(x, y, length, angle, level) {
     this.x = x;
@@ -38,7 +39,7 @@ class Segment {
   }
 
   draw() {
-    stroke(isUpsideDown ? 40 : 0);
+    stroke(isUpsideDown ? 60 : 0);
     strokeWeight(this.thickness);
 
     let sway = sin(frameCount * this.swaySpeed + this.y * 0.05) * this.swayAmp;
@@ -48,6 +49,7 @@ class Segment {
     line(this.x, this.y, nx, ny);
   }
 }
+
 
 class Apple {
   constructor(x, y, color) {
@@ -61,9 +63,18 @@ class Apple {
     this.state = "waiting";
     this.timer = 0;
 
-    this.swaySpeed = random(0.5, 0.3);
+    this.swaySpeed = random(0.3, 0.5);
     this.swayRate = random(1, 3);
     this.swayPhase = random(0, TWO_PI);
+
+    this.isCorrupting = false;
+    this.scale = 1;
+    this.alpha = 255;
+    this.particles = [];
+  }
+
+  startCorrupt() {
+    this.isCorrupting = true;
   }
 
   reset() {
@@ -75,6 +86,32 @@ class Apple {
   }
 
   update() {
+
+if (this.isCorrupting) {
+      this.scale -= 0.02;
+      this.alpha -= 6;
+
+      if (this.scale < 0) this.scale = 0;
+      if (this.alpha < 0) this.alpha = 0;
+
+      if (frameCount % 3 === 0) {
+        this.particles.push({
+          x: this.x + random(-5,5),
+          y: this.y + random(-5,5),
+          dx: random(-1, 1),
+          dy: random(-1, -3),
+          a: 255
+        });
+      }
+      
+      for (let p of this.particles) {
+        p.x += p.dx;
+        p.y += p.dy;
+        p.a -= 10;
+      }
+      return;
+    }
+
     if (this.state === "waiting") {
       this.timer++;
       if (this.timer > 120) {
@@ -90,8 +127,7 @@ class Apple {
       if (gravityDirection === 1 && this.y >= ground) {
         this.y = ground;
         this.state = "landed";
-      }
-      else if (gravityDirection === -1 && this.y <= topY) {
+      } else if (gravityDirection === -1 && this.y <= topY) {
         this.y = topY;
         this.state = "landed";
       }
@@ -104,21 +140,35 @@ class Apple {
   }
 
   draw() {
-   if (!isUpsideDown && !corruptApples) fill(this.color);
-   else fill(150, 0, 80);
 
-    stroke(isUpsideDown ? 80 : 255);
+push();
+    translate(this.x, this.y);
+    scale(this.scale);
 
-    let dx = this.x;
-    let dy = this.y;
+    if (!isUpsideDown)
+      fill(this.color[0], this.color[1], this.color[2], this.alpha);
+    else
+      fill(150, 0, 90, this.alpha);
 
-    if (this.state === "waiting") {
-      dx += sin(frameCount * this.swaySpeed + this.swayPhase) * this.swayRate;
+   if (isNight && !isUpsideDown) {
+      drawingContext.shadowBlur = 20;
+      drawingContext.shadowColor = color(255, 200, 150);
     }
 
-    ellipse(dx, dy, 40, 40);
+    noStroke();
+    ellipse(0, 0, 40, 40);
+    drawingContext.shadowBlur = 0;
+
+    pop();
+   
+   for (let p of this.particles) {
+      fill(200, 0, 150, p.a);
+      noStroke();
+      ellipse(p.x, p.y, 6, 6);
+    }
   }
 }
+
 
 class Firefly {
   constructor() {
@@ -134,10 +184,11 @@ class Firefly {
 
   draw() {
     noStroke();
-    fill(255,255,200,this.alpha);
+    fill(255,220,120,this.alpha);
     ellipse(this.x, this.y, 6, 6);
   }
 }
+
 
 class UIButton {
   constructor(x, y, w, h, label, callback) {
@@ -150,7 +201,6 @@ class UIButton {
   draw() {
     fill(60,0,80,160);
     stroke(255);
-    strokeWeight(2);
     rect(this.x, this.y, this.w, this.h, 8);
 
     fill(255);
@@ -159,11 +209,13 @@ class UIButton {
     textAlign(CENTER, CENTER);
     text(this.label, this.x + this.w/2, this.y + this.h/2);
   }
+
   isHovered(mx, my) {
     return mx > this.x && mx < this.x + this.w &&
            my > this.y && my < this.y + this.h;
   }
 }
+
 
 function generateTree(x, y, length, angle, level) {
   if (length < 40) return;
@@ -171,7 +223,7 @@ function generateTree(x, y, length, angle, level) {
   let s = new Segment(x, y, length, angle, level);
   branches.push(s);
 
-  let offset = random(radians(30), radians(90));
+  let offset = random(radians(30), radians(80));
   let endX = s.x2;
   let endY = s.y2;
 
@@ -182,9 +234,7 @@ function generateTree(x, y, length, angle, level) {
       lerp(s.x, s.x2, t),
       lerp(s.y, s.y2, t),
       random([
-        [240,70,70],[240,140,60],[220,120,120], 
-        [230,90,140],[250,120,90],[210,100,150]
-      ])
+        [240,70,70],[240,140,60],[230,90,140],[250,120,90]])
     ));
   }
 
@@ -192,28 +242,33 @@ function generateTree(x, y, length, angle, level) {
   generateTree(endX, endY, length * 0.75, angle - offset, level + 1);
 }
 
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
   scaleFactor = min(windowWidth / DESIGN_W, windowHeight / DESIGN_H);
 
   for (let i = 0; i < 1000; i++) {
     noisePoints.push({
       x: random(-800, DESIGN_W + 800),
       y: random(0, 650),
-      c: [random(100,180), random(150,200), random(200,255), random(80,150)]
+      c: [random(120,180), random(150,210), random(200,255), random(60,150)]
     });
   }
 
   generateTree(300, 650, 200, PI/2, 1);
 
   for (let i = 0; i < 40; i++) fireflies.push(new Firefly());
+
 buttons.push(new UIButton(
-    200, 250, 200, 60,
-    "Corrupt Apples",
-    ()=>{ corruptApples = true; }
+    430, 40, 150, 50,
+    "Corrupt 🍎",
+    ()=>{ 
+      startCorruption = true;
+      for (let a of apples) a.startCorrupt();
+    }
   ));
 }
+
 
 function draw() {
   background(
@@ -241,7 +296,8 @@ function draw() {
     rect(p.x, p.y, 100, 2);
   }
 
-  fill(isUpsideDown ? color(40,60,40): color(40,140,90));
+
+  fill(isUpsideDown ? 40 : 40,140,90);
   rect(0,650,600,100);
 
   stroke(0);
@@ -250,14 +306,15 @@ function draw() {
   rect(0,650,600,100);
   noStroke();
 
+  
   fill(isUpsideDown ? color(150,100,40) : color(240,210,60));
   stroke(0);
   strokeWeight(10);
   rect(125,625,350,75);
   noStroke();
 
+  
   branches.forEach(b => b.draw());
-
   apples.forEach(a => { a.update(); a.draw(); });
 
   if (!isUpsideDown && isNight) {
@@ -271,14 +328,21 @@ if (isUpsideDown) {
     push();
     scale(1, -1);
     translate(0, -DESIGN_H);
-
     buttons.forEach(b => b.draw());
-  
     pop();
 }
 
  pop();
+ 
+ push();
+  scale(scaleFactor);
+  translate((width/scaleFactor - DESIGN_W)/2, (height/scaleFactor - DESIGN_H)/2);
+  fill(255);
+  textSize(20);
+  text("Press T for Day / Night", 20, 40);
+  pop();
 }
+
 
 function mousePressed() {
   let cx = mouseX / scaleFactor - (width/scaleFactor - DESIGN_W)/2;
@@ -300,9 +364,6 @@ function mousePressed() {
     }
   }
 }
-  if (cx > 250 && cx < 350 && cy > 400 && cy < 650) {
-    isUpsideDown = !isUpsideDown;
-  }
 
 
 function keyPressed() {
