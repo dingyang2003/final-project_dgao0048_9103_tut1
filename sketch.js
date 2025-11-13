@@ -1,0 +1,264 @@
+const DESIGN_W = 600;
+const DESIGN_H = 800;
+
+let branches = [];
+let apples = [];
+let fireflies = [];
+let noisePoints = [];
+
+let isNight = false;
+let gravity = 0.2;
+let gravityDirection = 1;
+
+let ground = 750;
+let topY = 20;
+
+let scaleFactor;
+
+let isUpsideDown = false;
+
+class Segment {
+  constructor(x, y, length, angle, level) {
+    this.x = x;
+    this.y = y;
+    this.length = length;
+    this.angle = angle;
+    this.level = level;
+
+    this.thickness = [0, 15, 10, 7, 4][level] || 4;
+
+    this.swayAmp = random(1, 3);
+    this.swaySpeed = random(0.2, 0.2);
+
+    this.x2 = this.x + cos(angle) * length;
+    this.y2 = this.y - sin(angle) * length;
+  }
+
+  draw() {
+    stroke(isUpsideDown ? 40 : 0);
+    strokeWeight(this.thickness);
+
+    let sway = sin(frameCount * this.swaySpeed + this.y * 0.05) * this.swayAmp;
+    let nx = this.x + cos(this.angle + radians(sway * 0.5)) * this.length;
+    let ny = this.y - sin(this.angle + radians(sway * 0.5)) * this.length;
+
+    line(this.x, this.y, nx, ny);
+  }
+}
+
+class Apple {
+  constructor(x, y, color) {
+    this.startX = x;
+    this.startY = y;
+    this.x = x;
+    this.y = y;
+    this.color = color;
+
+    this.dropSpeed = 0;
+    this.state = "waiting";
+    this.timer = 0;
+
+    this.swaySpeed = random(0.5, 0.3);
+    this.swayRate = random(1, 3);
+    this.swayPhase = random(0, TWO_PI);
+  }
+
+  reset() {
+    this.x = this.startX;
+    this.y = this.startY;
+    this.dropSpeed = 0;
+    this.state = "waiting";
+    this.timer = 0;
+  }
+
+  update() {
+    if (this.state === "waiting") {
+      this.timer++;
+      if (this.timer > 120) {
+        this.state = "falling";
+        this.timer = 0;
+      }
+    }
+
+    else if (this.state === "falling") {
+      this.dropSpeed += gravity * gravityDirection;
+      this.y += this.dropSpeed;
+
+      if (gravityDirection === 1 && this.y >= ground) {
+        this.y = ground;
+        this.state = "landed";
+      }
+      else if (gravityDirection === -1 && this.y <= topY) {
+        this.y = topY;
+        this.state = "landed";
+      }
+    }
+
+    else {
+      this.timer++;
+      if (this.timer > 120) this.reset();
+    }
+  }
+
+  draw() {
+    if (!isUpsideDown) {
+      fill(this.color);
+    } else {
+      fill(120 + sin(frameCount * 0.1) * 50, 0, 80);
+    }
+
+    stroke(isUpsideDown ? 80 : 255);
+
+    let dx = this.x;
+    let dy = this.y;
+
+    if (this.state === "waiting") {
+      dx += sin(frameCount * this.swaySpeed + this.swayPhase) * this.swayRate;
+    }
+
+    ellipse(dx, dy, 40, 40);
+  }
+}
+
+class Firefly {
+  constructor() {
+    this.x = random(50, DESIGN_W - 50);
+    this.y = random(100, 600);
+    this.twinkle = random(0.02, 0.05);
+  }
+
+  update() {
+    this.alpha = 150 + 100 * sin(frameCount * this.twinkle);
+    this.y += sin(frameCount * this.twinkle) * 0.3;
+  }
+
+  draw() {
+    noStroke();
+    fill(255,255,200,this.alpha);
+    ellipse(this.x, this.y, 6, 6);
+  }
+}
+
+function generateTree(x, y, length, angle, level) {
+  if (length < 40) return;
+
+  let s = new Segment(x, y, length, angle, level);
+  branches.push(s);
+
+  let offset = random(radians(30), radians(90));
+  let endX = s.x2;
+  let endY = s.y2;
+
+  if (level >= 3 && random() < 0.2) {
+    let t = random(0.3, 0.9);
+
+    apples.push(new Apple(
+      lerp(s.x, s.x2, t),
+      lerp(s.y, s.y2, t),
+      random([
+        [240,70,70],[240,140,60],[220,120,120], 
+        [230,90,140],[250,120,90],[210,100,150]
+      ])
+    ));
+  }
+
+  generateTree(endX, endY, length * 0.75, angle + offset, level + 1);
+  generateTree(endX, endY, length * 0.75, angle - offset, level + 1);
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  scaleFactor = min(windowWidth / DESIGN_W, windowHeight / DESIGN_H);
+
+  for (let i = 0; i < 1000; i++) {
+    noisePoints.push({
+      x: random(-800, DESIGN_W + 800),
+      y: random(0, 650),
+      c: [random(100,180), random(150,200), random(200,255), random(80,150)]
+    });
+  }
+
+  generateTree(300, 650, 200, PI/2, 1);
+
+  for (let i = 0; i < 40; i++) fireflies.push(new Firefly());
+}
+
+function draw() {
+  if (!isUpsideDown) {
+    background(isNight ? color(20,30,60) : color(100,150,200));
+  } else {
+    background(20,10,30);
+  }
+
+  push();
+  scale(scaleFactor);
+
+  translate(
+    (width/scaleFactor - DESIGN_W)/2,
+    (height/scaleFactor - DESIGN_H)/2
+  );
+
+  if (isUpsideDown) {
+    scale(1, -1);          
+    translate(0, -DESIGN_H);  
+  }
+
+  noStroke();
+  for (let p of noisePoints) {
+    fill(p.c);
+    rect(p.x, p.y, 100, 2);
+  }
+
+  fill(isUpsideDown ? color(40,60,40): color(40,140,90));
+  rect(0,650,600,100);
+
+  stroke(0);
+  strokeWeight(5);
+  noFill();
+  rect(0,650,600,100);
+  noStroke();
+
+  fill(isUpsideDown ? color(150,100,40) : color(240,210,60));
+  stroke(0);
+  strokeWeight(10);
+  rect(125,625,350,75);
+  noStroke();
+
+  branches.forEach(b => b.draw());
+
+  apples.forEach(a => { a.update(); a.draw(); });
+
+  if (!isUpsideDown && isNight) {
+
+    fill(255,255,200,80);
+    ellipse(520,100,80,80);
+
+    fireflies.forEach(f=>{
+      f.update();
+      f.draw();
+    });
+  }
+
+  pop();
+}
+
+function mousePressed() {
+  let cx = mouseX / scaleFactor - (width/scaleFactor - DESIGN_W)/2;
+  let cy = mouseY / scaleFactor - (height/scaleFactor - DESIGN_H)/2;
+
+  if (cx > 250 && cx < 350 && cy > 400 && cy < 650) {
+    isUpsideDown = !isUpsideDown;
+  }
+}
+
+function keyPressed() {
+  if (key === " ") { 
+    gravityDirection *= -1;
+    apples.forEach(a => a.reset());
+  }
+
+  if (key === "T" || key === "t") { 
+    isNight = !isNight;
+  }
+}
