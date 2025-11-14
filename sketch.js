@@ -29,6 +29,18 @@ const RAIN_BTN_H = 40;
 const SMOKE_BTN_W = 150;
 const SMOKE_BTN_H = 40;
 
+class RainDrop {
+  constructor() {
+    this.x = random(0, DESIGN_W);
+    this.y = random(-200, 0);
+    this.len = random(8, 15);
+  }
+
+draw() {
+    stroke(200, 200, 255, 150);
+    strokeWeight(2);
+    line(this.x, this.y, this.x, this.y + this.len);
+
 class Segment{
   constructor(x,y,length,angle,level){
     this.x = x;
@@ -57,7 +69,6 @@ class Segment{
   
   draw(){
     stroke(0);
-    // ↑ branches' color
     strokeWeight(this.thickness);
     
     let sway = sin(frameCount* this.swaySpeed + this.y * 0.05)* this.swayAmp;
@@ -65,8 +76,6 @@ class Segment{
     let newX = this.x + cos(this.angle + radians(sway * 0.5)) * this.length;
     let newY = this.y - sin(this.angle + radians(sway * 0.5)) * this.length;
 
-    line(this.x, this.y, newX, newY);
-    //let branches silghtly wave.
   }
 }
 
@@ -300,6 +309,8 @@ function draw(){
     text("- Let Newton be confused ! ! ! -",240,30);
     pop();
 }
+
+
 
 function fitWidow(){
   resizeCanvas(windowWidth,windowHeight);
