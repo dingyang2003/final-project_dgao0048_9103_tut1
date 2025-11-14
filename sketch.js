@@ -470,11 +470,21 @@ function mousePressed() {
   }
 }
 
-//Key control
+// Key control
 function keyPressed(){
   if (key === 'T' || key === 't') {
     if (!isUpsideDown) {
       isNight = !isNight;
     } 
   }
+}
+
+// Resize
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  calcScaleFactor();
+}
+
+function calcScaleFactor() {
+  scaleFactor = min(windowWidth / DESIGN_W, windowHeight / DESIGN_H);
 }
