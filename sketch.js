@@ -1,5 +1,5 @@
+const DESIGN_W = 600;  
 const DESIGN_H = 800;
-const DESIGN_W = 600;
 
 let branches = [];
 let apples = [];
@@ -36,20 +36,21 @@ class RainDrop {
     this.x = random(0, DESIGN_W);
     this.y = random(-200, 0);
     this.len = random(8, 15);
+    this.speed = random(6, 10);
   }
-update() {
+  update() {
     this.y += this.speed;
     if (this.y > DESIGN_H) {
       this.y = random(-100, 0);
       this.x = random(0, DESIGN_W);
     }
   }
-draw() {
+  draw() {
     stroke(200, 200, 255, 150);
     strokeWeight(2);
     line(this.x, this.y, this.x, this.y + this.len);
-}
   }
+}
 
 // Tree Segment
 
@@ -92,8 +93,8 @@ draw() {
 
 class Apple {
   constructor(x,y,color){
-    this.stratX = x;
-    this.stratY = y;
+    this.startX = x;
+    this.startY = y;
     this.x = x;
     this.y = y;
     this.color = color;
@@ -108,8 +109,8 @@ class Apple {
   }  
 
   reset() {
-    this.x = this.stratX;
-    this.y = this.stratY;
+    this.x = this.startX;
+    this.y = this.startY;
     this.dropSpeed = 0;
     this.state = "waiting";
     this.timer = 0;
@@ -244,8 +245,8 @@ function generateTree(x, y, length, angle, level) {
   let b = new Segment(x, y, length, angle, level);
   branches.push(b);
 
-  let endX = branch.x2;
-  let endY = branch.y2;
+  let endX = b.x2;
+  let endY = b.y2;
 
   let offset = level === 1 ? radians(25) : radians(35);
   let left = angle + offset;
