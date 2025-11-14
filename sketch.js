@@ -29,55 +29,65 @@ const RAIN_BTN_H = 40;
 const SMOKE_BTN_W = 150;
 const SMOKE_BTN_H = 40;
 
+//Rain drop
+
 class RainDrop {
   constructor() {
     this.x = random(0, DESIGN_W);
     this.y = random(-200, 0);
     this.len = random(8, 15);
   }
-
+update() {
+    this.y += this.speed;
+    if (this.y > DESIGN_H) {
+      this.y = random(-100, 0);
+      this.x = random(0, DESIGN_W);
+    }
+  }
 draw() {
     stroke(200, 200, 255, 150);
     strokeWeight(2);
     line(this.x, this.y, this.x, this.y + this.len);
+}
+  }
 
-class Segment{
+// Tree Segment
+
+  class Segment{
   constructor(x,y,length,angle,level){
     this.x = x;
     this.y = y;
     this.length = length;
-    this.angle = angle;
     this.level = level;
 
-    if(this.level === 1){
-      this.thickness = 15;
-    } else if(this.level === 2){
-      this.thickness = 10;
-    } else if(this.level === 3){
-      this.thickness = 7;
-    } else{
-      this.thickness = 4
-    }
+    this.angle = angle + random(-0.15, 0.15);
 
-    this.swayAmp = random(1,3);
-    this.swaySpeed = random(0.2, 0.2);
+    this.thickness = [0, 15, 10, 7, 5][level] || 4;
 
-    this.x2 = this.x + cos(this.angle) * this.length;
-    this.y2 = this.y - sin(this.angle) * this.length;
+    this.swayAmp = random(1, 2);
+    this.swaySpeed = random(0.15, 0.2);
+    
+    this.x2 = x + cos(this.angle) * length;
+    this.y2 = y - sin(this.angle) * length;
   }
 
-  
   draw(){
-    stroke(0);
+    stroke(isUpsideDown ? 40 : 0);
     strokeWeight(this.thickness);
     
-    let sway = sin(frameCount* this.swaySpeed + this.y * 0.05)* this.swayAmp;
+    let sway = 0;
 
-    let newX = this.x + cos(this.angle + radians(sway * 0.5)) * this.length;
-    let newY = this.y - sin(this.angle + radians(sway * 0.5)) * this.length;
+    if (isUpsideDown) {
+      sway = sin(frameCount * this.swaySpeed + this.y * 0.08) * this.swayAmp;
+    }
 
+    let nx = this.x + cos(this.angle + radians(sway)) * this.length;
+    let ny = this.y - sin(this.angle + radians(sway)) * this.length;
+
+     line(this.x, this.y, nx, ny);
   }
 }
+
 
 class Apple {
   constructor(x,y,color){
