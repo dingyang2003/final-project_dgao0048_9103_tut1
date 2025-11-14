@@ -144,52 +144,145 @@ class Apple {
     } else {
       drawingContext.shadowBlur = 0;
     }
-    
-    stroke(225,225,0);
-    fill(this.color[0],this.color[1],this.color[2]);
-    
-    let drawX = this.x;
-    let drawY = this.y;
-    if (this.state === "waiting") {
-      const t = frameCount * this.swaySpeed + this.swayPhase;
-      drawX += sin(t) * this.swayRate;}
 
-    
-      ellipse(drawX, drawY, 40, 40);
+    if (isUpsideDown) {
+      fill(140 + sin(frameCount * 0.15) * 20, 0, 100);
+    } else {
+      fill(this.color);
+    }
+
+    stroke(0);
+
+    let dx = this.x;
+    let dy = this.y;
+
+    if (this.state === "waiting") {
+      dx += sin(frameCount * this.swaySpeed + this.swayPhase) * this.swayRate;
+    }
+     
+      ellipse(dx, dy, 40, 40);
   }
 }
 
-function generateTree(x, y, length, angle, level){
+// Firefly
+
+class Firefly {
+  constructor() {
+    this.x = random(50, DESIGN_W - 50);
+    this.y = random(100, 600);
+    this.tw = random(0.02, 0.05);
+  }
+  update() {
+    this.alpha = 150 + sin(frameCount * this.tw) * 100;
+    this.y += sin(frameCount * this.tw) * 0.3;
+  }
+  draw() {
+    noStroke();
+    fill(255, 210, 80, this.alpha); 
+    ellipse(this.x, this.y, 7, 7);
+  }
+}
+
+// Dark Particles
+
+class DarkParticle {
+  constructor() {
+    this.x = random(0, DESIGN_W);
+    this.y = random(350, 750);
+    this.alpha = random(50, 120);
+    this.size = random(4, 10);
+    this.tw = random(0.03, 0.06);
+  }
+  update() {
+    this.y += sin(frameCount * this.tw) * 0.4;
+    if (this.y < 350) this.y = 750;
+    if (this.y > 750) this.y = 350;
+  }
+  draw() {
+    noStroke();
+    fill(120, 0, 140, this.alpha);
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+}
+
+// Smoke
+
+class SmokeParticle {
+  constructor() {
+    this.x = random(50, DESIGN_W - 50);
+    this.y = random(500, 750);
+    this.size = random(20, 45);
+    this.alpha = random(40, 90);
+    this.speed = random(0.2, 0.6);
+    this.xSpeed = random(-0.3, 0.3);
+  }
+
+  update() {
+    this.y -= this.speed;
+    this.x += this.xSpeed;
+    this.alpha -= 0.2;
+
+    if (this.alpha <= 0) {
+      this.x = random(50, DESIGN_W - 50);
+      this.y = random(650, 750);
+      this.alpha = random(50, 100);
+    }
+  }
+
+  draw() {
+    noStroke();
+    fill(180, 120, 200, this.alpha);
+    ellipse(this.x, this.y, this.size, this.size * 0.7);
+  }
+}
+
+// Tree generator
+
+function generateTree(x, y, length, angle, level) {
   if (length < 40) return;
   
-  let branch = new Segment(x, y, length, angle, level);
-  branches.push(branch);
-
-  let angleOffset = random(radians(30),radians(90));
+  let b = new Segment(x, y, length, angle, level);
+  branches.push(b);
 
   let endX = branch.x2;
   let endY = branch.y2;
-  
-  if (level >= 3 && random()<0.2){
-    let t = random(0.3,0.9);
-    let appleX = lerp(branch.x, branch.x2, t);
-    let appleY = lerp(branch.y, branch.y2, t);
-    let colorChoice = [
-      [240,70,70],
-      [240,140,60],
-      [220,120,120],
-      [230,90,140],
-      [250,120,90],
-      [210,100,150]
-    ];
-    let c = random(colorChoice);
-    apples.push(new Apple(appleX, appleY, c));
-  }
-  /*The transition from "if(level >= 3)" to "apples.push(new Apple(appleX, appleY, c));"
-  is partly obtained by asking ChatGPT, The specific question-and-answer process will be placed in the appendix.*/
 
-  generateTree(endX, endY, length* 0.75, angle + angleOffset, level + 1);
-  generateTree(endX, endY, length* 0.75, angle - angleOffset, level + 1);
+  let offset = level === 1 ? radians(25) : radians(35);
+  let left = angle + offset;
+  let right = angle - offset;
+  
+  if (level >= 3 && random()<0.3) {
+     apples.push(new Apple(
+      lerp(b.x, b.x2, random(0.3, 0.9)),
+      lerp(b.y, b.y2, random(0.3, 0.9)),
+      random([
+        [240, 70, 70],
+        [240, 140, 60],
+        [210, 100, 150]
+      ])
+    ));
+  }
+  
+  generateTree(endX, endY, length* 0.75, left, level + 1);
+  generateTree(endX, endY, length* 0.75, right, level + 1);
+}
+
+function addRandomApple() {
+  if (branches.length === 0) return;
+  let candidates = branches.filter(b => b.level >= 3);
+  if (candidates.length === 0) candidates = branches;
+  let b = random(candidates);
+  let t = random(0.3, 0.9);
+  let ax = lerp(b.x, b.x2, t);
+  let ay = lerp(b.y, b.y2, t);
+  apples.push(new Apple(
+    ax, ay,
+    random([
+      [240, 70, 70],
+      [240, 140, 60],
+      [210, 100, 150]
+    ])
+  ));
 }
 
 function setup() {
