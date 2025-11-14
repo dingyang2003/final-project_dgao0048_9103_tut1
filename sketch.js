@@ -1,4 +1,4 @@
-const DESIGN_W = 600;  
+const DESIGN_W = 600;
 const DESIGN_H = 800;
 
 let branches = [];
@@ -29,7 +29,6 @@ const RAIN_BTN_H = 40;
 const SMOKE_BTN_W = 150;
 const SMOKE_BTN_H = 40;
 
-// Rain drop
 
 class RainDrop {
   constructor() {
@@ -52,10 +51,9 @@ class RainDrop {
   }
 }
 
-// Tree Segment
 
-  class Segment{
-  constructor(x,y,length,angle,level){
+class Segment {
+  constructor(x, y, length, angle, level) {
     this.x = x;
     this.y = y;
     this.length = length;
@@ -67,15 +65,15 @@ class RainDrop {
 
     this.swayAmp = random(1, 2);
     this.swaySpeed = random(0.15, 0.2);
-    
+
     this.x2 = x + cos(this.angle) * length;
     this.y2 = y - sin(this.angle) * length;
   }
 
-  draw(){
+  draw() {
     stroke(isUpsideDown ? 40 : 0);
     strokeWeight(this.thickness);
-    
+
     let sway = 0;
 
     if (isUpsideDown) {
@@ -85,14 +83,13 @@ class RainDrop {
     let nx = this.x + cos(this.angle + radians(sway)) * this.length;
     let ny = this.y - sin(this.angle + radians(sway)) * this.length;
 
-     line(this.x, this.y, nx, ny);
+    line(this.x, this.y, nx, ny);
   }
 }
 
-// Apple
 
 class Apple {
-  constructor(x,y,color){
+  constructor(x, y, color) {
     this.startX = x;
     this.startY = y;
     this.x = x;
@@ -100,13 +97,13 @@ class Apple {
     this.color = color;
 
     this.dropSpeed = 0;
-    this.state = "waiting";
-    this.timer = 0; 
+    this.state = "waiting"; 
+    this.timer = 0;
 
-    this.swayRate = random(1, 3);    
-    this.swaySpeed = random(0.5, 0.3); 
-    this.swayPhase = random(0, TWO_PI); 
-  }  
+    this.swayRate = random(1, 3);
+    this.swaySpeed = random(0.5, 0.3);
+    this.swayPhase = random(0, TWO_PI);
+  }
 
   reset() {
     this.x = this.startX;
@@ -117,29 +114,28 @@ class Apple {
   }
 
   update() {
-    if (this.state ==="waiting"){
+    if (this.state === "waiting") {
       this.timer++;
-      if(this.timer > 120) this.state = "falling";
-  } else if (this.state ==="falling") {
+      if (this.timer > 120) this.state = "falling";
+    } else if (this.state === "falling") {
       this.dropSpeed += gravity * gravityDirection;
       this.y += this.dropSpeed;
-    
-    if(gravityDirection === 1 && this.y >= ground) {
-      this.y = ground;
-      this.state = "landed";
-    } else if (gravityDirection === -1 && this.y <=topY) {
-      this.y = topY;
-      this.state = "landed";
-    }
-  } else if (this.state === "landed"){
-        this.timer++;
-        if(this.timer > 120) this.reset();
-  }
-}
 
-  
+      if (gravityDirection === 1 && this.y >= ground) {
+        this.y = ground;
+        this.state = "landed";
+      } else if (gravityDirection === -1 && this.y <= topY) {
+        this.y = topY;
+        this.state = "landed";
+      }
+    } else if (this.state === "landed") {
+      this.timer++;
+      if (this.timer > 120) this.reset();
+    }
+  }
+
   draw() {
-     if (!isUpsideDown && isNight) {
+    if (!isUpsideDown && isNight) {
       drawingContext.shadowBlur = 25;
       drawingContext.shadowColor = color(255, 220, 150);
     } else {
@@ -160,12 +156,12 @@ class Apple {
     if (this.state === "waiting") {
       dx += sin(frameCount * this.swaySpeed + this.swayPhase) * this.swayRate;
     }
-     
-      ellipse(dx, dy, 40, 40);
+
+    ellipse(dx, dy, 40, 40);
   }
 }
 
-// Firefly
+
 
 class Firefly {
   constructor() {
@@ -184,7 +180,6 @@ class Firefly {
   }
 }
 
-// Dark Particles
 
 class DarkParticle {
   constructor() {
@@ -206,7 +201,6 @@ class DarkParticle {
   }
 }
 
-// Smoke
 
 class SmokeParticle {
   constructor() {
@@ -237,11 +231,10 @@ class SmokeParticle {
   }
 }
 
-// Tree generator
 
 function generateTree(x, y, length, angle, level) {
   if (length < 40) return;
-  
+
   let b = new Segment(x, y, length, angle, level);
   branches.push(b);
 
@@ -251,9 +244,9 @@ function generateTree(x, y, length, angle, level) {
   let offset = level === 1 ? radians(25) : radians(35);
   let left = angle + offset;
   let right = angle - offset;
-  
-  if (level >= 3 && random()<0.3) {
-     apples.push(new Apple(
+
+  if (level >= 3 && random() < 0.3) {
+    apples.push(new Apple(
       lerp(b.x, b.x2, random(0.3, 0.9)),
       lerp(b.y, b.y2, random(0.3, 0.9)),
       random([
@@ -263,9 +256,9 @@ function generateTree(x, y, length, angle, level) {
       ])
     ));
   }
-  
-  generateTree(endX, endY, length* 0.75, left, level + 1);
-  generateTree(endX, endY, length* 0.75, right, level + 1);
+
+  generateTree(endX, endY, length * 0.75, left, level + 1);
+  generateTree(endX, endY, length * 0.75, right, level + 1);
 }
 
 function addRandomApple() {
@@ -286,31 +279,28 @@ function addRandomApple() {
   ));
 }
 
-// Setup
 
 function setup() {
-  createCanvas(windowWidth, windowHeight); 
+  createCanvas(windowWidth, windowHeight);
   calcScaleFactor();
 
   for (let i = 0; i < 800; i++) {
     noisePoints.push({
       x: random(-800, DESIGN_W + 800),
       y: random(0, 650),
-      c:[random(100,180), random(150,200), random(200,255), random(80,150)]
+      c: [random(100,180), random(150,200), random(200,255), random(80,150)]
     });
   }
 
   generateTree(300, 650, 200, PI / 2, 1);
 
-   for (let i = 0; i < 40; i++) fireflies.push(new Firefly());
+  for (let i = 0; i < 40; i++) fireflies.push(new Firefly());
   for (let i = 0; i < 80; i++) darkParticles.push(new DarkParticle());
 }
 
-// Draw
 
 function draw() {
-
-   if (!isUpsideDown) {
+  if (!isUpsideDown) {
     background(isNight ? color(20,30,60) : color(110,160,220));
   } else {
     let t = frameCount * 0.01;
@@ -320,17 +310,17 @@ function draw() {
     background(r, g, b);
   }
 
-   if (!isNight && !isUpsideDown) {
+  if (!isNight && !isUpsideDown) {
     if (apples.length < 40) {
       addRandomApple();
     }
   }
-  
+
   push();
   scale(scaleFactor);
   translate((width / scaleFactor - DESIGN_W) / 2,
             (height / scaleFactor - DESIGN_H) / 2);
-  
+
   translate(DESIGN_W / 2, DESIGN_H / 2);
   rotate(flipAngle);
   translate(-DESIGN_W / 2, -DESIGN_H / 2);
@@ -342,7 +332,7 @@ function draw() {
     }
   }
 
-  for (let p of noisePoints){
+  for (let p of noisePoints) {
     fill(isUpsideDown ? color(80,0,120,50) : p.c);
     rect(p.x, p.y, 100, 2);
   }
@@ -353,13 +343,13 @@ function draw() {
   stroke(0);
   strokeWeight(5);
   noFill();
-  rect(0,650,600,100);
+  rect(0, 650, 600, 100);
   noStroke();
 
   fill(isUpsideDown ? color(150,120,40) : color(240,210,60));
   stroke(0);
   strokeWeight(10);
-  rect(125,625,350,75);
+  rect(125, 625, 350, 75);
   noStroke();
 
   branches.forEach(b => b.draw());
@@ -379,8 +369,9 @@ function draw() {
 
   flipAngle = lerp(flipAngle, targetAngle, 0.08);
 
-   drawUI();
+  drawUI();
 }
+
 
 function drawUI() {
   push();
@@ -424,7 +415,6 @@ function drawUI() {
   pop();
 }
 
-// Mouse
 
 function mousePressed() {
 
@@ -439,11 +429,11 @@ function mousePressed() {
     targetAngle = isUpsideDown ? PI : 0;
   }
 
-   let rainX = width - RAIN_BTN_W - 20;
+  let rainX = width - RAIN_BTN_W - 20;
   let rainY = 20;
   if (mouseX > rainX && mouseX < rainX + RAIN_BTN_W &&
       mouseY > rainY && mouseY < rainY + RAIN_BTN_H) {
-  
+
     if (!isUpsideDown) {
       isRaining = !isRaining;
       if (isRaining) {
@@ -471,16 +461,16 @@ function mousePressed() {
   }
 }
 
-// Key control
-function keyPressed(){
+
+function keyPressed() {
   if (key === 'T' || key === 't') {
     if (!isUpsideDown) {
       isNight = !isNight;
-    } 
+    }
   }
 }
 
-// Resize
+
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   calcScaleFactor();
