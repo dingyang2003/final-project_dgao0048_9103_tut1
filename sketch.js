@@ -401,88 +401,80 @@ function drawUI() {
     text("Smoke button: toggle creepy fog", 20, 20 + txtSize + 8);
   }
 
-
-  for (let i = 0; i < 6; i++){
-    fill(colors[i]);
-    rect(startX + i * boxW, startY, boxW, boxH);
-  }
-  
-  const bottomColors = [
-    color(40,160,100),
-    color(240,210,60),
-    color(240,70,70),
-    color(240,70,70),
-    color(240,210,60),
-    color(40,160,100)
-  ];
-
-  for (let i = 0; i < 6; i++){
-    let cx = startX + i * boxW + boxW / 2;
-    let cy = startY + boxH;
-    let r = boxW * 0.9;
-    fill(bottomColors[i]);
-    arc(cx, cy, r, r, PI, 0);
-  }
-
-  const topColors = [
-    color(40, 160, 100),
-    color(240, 70, 70),
-    color(40, 160, 100),
-    color(240, 70, 70)
-  ];
-  const topCenters = [
-    startX + boxW * 1.5,
-    startX + boxW * 2.5,
-    startX + boxW * 3.5,
-    startX + boxW * 4.5
-  ];
-  for (let i = 0; i < 4; i++){
-    let cx = topCenters[i];
-    let cy = startY;
-    let r = (i === 1 || i === 2) ? boxW * 0.7 : boxW * 0.9;
-    fill(topColors[i]);
-    arc(cx,cy,r,r,0,PI);
-  }
-
-  noStroke();
-  for (let i = 0; i < 300; i++){
-    fill(255,255,255,random(10,40));
-    rect(random(125,475),random(625,700), 1, 1);
-  }
-
-  for (let branch of branches ){
-    branch.draw(); 
-  }
-
-  for (let a of apples){
-    a.update();
-    a.draw();
-  }
-  
-  noStroke();
+  let rainX = width - RAIN_BTN_W - 20;
+  let rainY = 20;
+  fill(0, 0, 0, 140);
+  rect(rainX, rainY, RAIN_BTN_W, RAIN_BTN_H, 8);
   fill(255);
-  textSize(25);
-  if(gravityDirection === 1){
-    text("Press SPACE to change gravity (now ↓ ↓ ↓)",20,785);
-  }else{
-    text("Press SPACE to change gravity (now ↑ ↑ ↑)",20,785);
+  textAlign(CENTER, CENTER);
+  textSize(txtSize);
+  text("Rain ☔", rainX + RAIN_BTN_W / 2, rainY + RAIN_BTN_H / 2);
+
+  if (isUpsideDown) {
+    let smokeX = 20;
+    let smokeY = 20 + (txtSize + 8) * 2;
+    fill(0, 0, 0, 140);
+    rect(smokeX, smokeY, SMOKE_BTN_W, SMOKE_BTN_H, 8);
+    fill(255);
+    textAlign(CENTER, CENTER);
+    text("Smoke ☁️", smokeX + SMOKE_BTN_W / 2, smokeY + SMOKE_BTN_H / 2);
   }
-    text("- Let Newton be confused ! ! ! -",240,30);
-    pop();
+
+  pop();
 }
 
+// Mouse
 
+function mousePressed() {
 
-function fitWidow(){
-  resizeCanvas(windowWidth,windowHeight);
-  scaleFactor = min(windowWidth / DESIGN_W, windowHeight/ DESIGN_H);
+  let offsetX = (width / scaleFactor - DESIGN_W) / 2;
+  let offsetY = (height / scaleFactor - DESIGN_H) / 2;
+
+  let cx = mouseX / scaleFactor - offsetX;
+  let cy = mouseY / scaleFactor - offsetY;
+
+  if (cx > 250 && cx < 350 && cy > 350 && cy < 650) {
+    isUpsideDown = !isUpsideDown;
+    targetAngle = isUpsideDown ? PI : 0;
+  }
+
+   let rainX = width - RAIN_BTN_W - 20;
+  let rainY = 20;
+  if (mouseX > rainX && mouseX < rainX + RAIN_BTN_W &&
+      mouseY > rainY && mouseY < rainY + RAIN_BTN_H) {
+  
+    if (!isUpsideDown) {
+      isRaining = !isRaining;
+      if (isRaining) {
+        rainDrops = [];
+        for (let i = 0; i < 200; i++) rainDrops.push(new RainDrop());
+      }
+    }
+  }
+
+  if (isUpsideDown) {
+    const base = min(windowWidth, windowHeight);
+    const txtSize = max(14, base * 0.02);
+    let smokeX = 20;
+    let smokeY = 20 + (txtSize + 8) * 2;
+
+    if (mouseX > smokeX && mouseX < smokeX + SMOKE_BTN_W &&
+        mouseY > smokeY && mouseY < smokeY + SMOKE_BTN_H) {
+
+      isSmoke = !isSmoke;
+      if (isSmoke) {
+        smokeParticles = [];
+        for (let i = 0; i < 60; i++) smokeParticles.push(new SmokeParticle());
+      }
+    }
+  }
 }
 
+//Key control
 function keyPressed(){
-  if (key === ' '){
-    gravityDirection *= -1;
-    for (let a of apples){
-      a.reset();
+  if (key === 'T' || key === 't') {
+    if (!isUpsideDown) {
+      isNight = !isNight;
     } 
   }
 }
