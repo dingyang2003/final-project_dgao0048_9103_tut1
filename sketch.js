@@ -29,7 +29,7 @@ const RAIN_BTN_H = 40;
 const SMOKE_BTN_W = 150;
 const SMOKE_BTN_H = 40;
 
-//Rain drop
+// Rain drop
 
 class RainDrop {
   constructor() {
@@ -88,6 +88,7 @@ draw() {
   }
 }
 
+// Apple
 
 class Apple {
   constructor(x,y,color){
@@ -95,56 +96,55 @@ class Apple {
     this.stratY = y;
     this.x = x;
     this.y = y;
-    this.dropSpeed = 0;
     this.color = color;
+
+    this.dropSpeed = 0;
     this.state = "waiting";
     this.timer = 0; 
 
-    this.swayRate = random(1.0, 3.0);    
+    this.swayRate = random(1, 3);    
     this.swaySpeed = random(0.5, 0.3); 
     this.swayPhase = random(0, TWO_PI); 
-  }     
-  reset(){
-    //back to the tree.
+  }  
+
+  reset() {
     this.x = this.stratX;
     this.y = this.stratY;
     this.dropSpeed = 0;
     this.state = "waiting";
     this.timer = 0;
-    this.swayPhase = random(0, TWO_PI);
   }
-  update(){
+
+  update() {
     if (this.state ==="waiting"){
       this.timer++;
-      if(this.timer > 120){
-        this.state = "falling";
-        this.timer = 0;
-      }
-    } else if (this.state ==="falling"){
+      if(this.timer > 120) this.state = "falling";
+  } else if (this.state ==="falling") {
       this.dropSpeed += gravity * gravityDirection;
       this.y += this.dropSpeed;
     
-    if(gravityDirection === 1 && this.y >= ground){
+    if(gravityDirection === 1 && this.y >= ground) {
       this.y = ground;
       this.state = "landed";
-      this.dropSpeed = 0;
-      this.timer = 0;
-    } else if (gravityDirection === -1 && this.y <=topY){
+    } else if (gravityDirection === -1 && this.y <=topY) {
       this.y = topY;
       this.state = "landed";
-      this.dropSpeed = 0;
-      this.timer = 0;
     }
-  }
-      else if (this.state === "landed"){
+  } else if (this.state === "landed"){
         this.timer++;
-        if(this.timer > 120){
-          this.reset();
-        }
-      }
-    }
+        if(this.timer > 120) this.reset();
+  }
+}
+
   
-  draw(){
+  draw() {
+     if (!isUpsideDown && isNight) {
+      drawingContext.shadowBlur = 25;
+      drawingContext.shadowColor = color(255, 220, 150);
+    } else {
+      drawingContext.shadowBlur = 0;
+    }
+    
     stroke(225,225,0);
     fill(this.color[0],this.color[1],this.color[2]);
     
