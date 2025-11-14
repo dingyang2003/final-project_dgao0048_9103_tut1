@@ -285,19 +285,24 @@ function addRandomApple() {
   ));
 }
 
+// Setup
+
 function setup() {
   createCanvas(windowWidth, windowHeight); 
-  frameRate(60);  
-  scaleFactor = min(windowWidth/ DESIGN_W, windowHeight/ DESIGN_H);
+  calcScaleFactor();
 
-  for (let i = 0; i < 1000; i++){
+  for (let i = 0; i < 800; i++) {
     noisePoints.push({
-      x: random(-width- 1000, width+ 1000),
+      x: random(-800, DESIGN_W + 800),
       y: random(0, 650),
       c:[random(100,180), random(150,200), random(200,255), random(80,150)]
     });
   }
+
   generateTree(300, 650, 200, PI / 2, 1);
+
+   for (let i = 0; i < 40; i++) fireflies.push(new Firefly());
+  for (let i = 0; i < 80; i++) darkParticles.push(new DarkParticle());
 }
 
 
