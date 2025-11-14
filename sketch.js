@@ -305,49 +305,102 @@ function setup() {
   for (let i = 0; i < 80; i++) darkParticles.push(new DarkParticle());
 }
 
+// Draw
 
-function draw(){
-  //base background
-  background(60,80,120);
+function draw() {
+
+   if (!isUpsideDown) {
+    background(isNight ? color(20,30,60) : color(110,160,220));
+  } else {
+    let t = frameCount * 0.01;
+    let r = 25 + sin(t) * 20;
+    let g = 10 + sin(t * 1.3) * 10;
+    let b = 40 + cos(t * 0.7) * 25;
+    background(r, g, b);
+  }
+
+   if (!isNight && !isUpsideDown) {
+    if (apples.length < 40) {
+      addRandomApple();
+    }
+  }
   
   push();
   scale(scaleFactor);
-  translate((width / scaleFactor - DESIGN_W)/ 2, (height/ scaleFactor - DESIGN_H)/2);
+  translate((width / scaleFactor - DESIGN_W) / 2,
+            (height / scaleFactor - DESIGN_H) / 2);
+  
+  translate(DESIGN_W / 2, DESIGN_H / 2);
+  rotate(flipAngle);
+  translate(-DESIGN_W / 2, -DESIGN_H / 2);
 
-  noStroke();
+  if (isUpsideDown) {
+    for (let d of darkParticles) { d.update(); d.draw(); }
+    if (isSmoke) {
+      for (let s of smokeParticles) { s.update(); s.draw(); }
+    }
+  }
+
   for (let p of noisePoints){
-    fill(p.c[0],p.c[1],p.c[2],p.c[3]);
+    fill(isUpsideDown ? color(80,0,120,50) : p.c);
     rect(p.x, p.y, 100, 2);
   }
 
-  fill(40,140,90);
-  rect(0,650,600,100);
+  fill(isUpsideDown ? color(70,90,80) : color(40,140,90));
+  rect(0, 650, 600, 100);
+
   stroke(0);
   strokeWeight(5);
   noFill();
   rect(0,650,600,100);
   noStroke();
 
-  //yellow base
-  fill(240,210,60);
+  fill(isUpsideDown ? color(150,120,40) : color(240,210,60));
   stroke(0);
   strokeWeight(10);
   rect(125,625,350,75);
   noStroke();
 
-  //colorfull rects
-  const colors = [
-    color(240,210,60),
-    color(240,70,70),
-    color(40,160,100),
-    color(240,210,60),
-    color(40,160,100),
-    color(240,210,60)
-  ];
-  const startX = 125;
-  const startY = 625;
-  const boxW = 350 / 6;
-  const boxH = 75;
+  branches.forEach(b => b.draw());
+  apples.forEach(a => { a.update(); a.draw(); });
+
+  if (!isUpsideDown && isNight) {
+    fill(255,255,200,90);
+    ellipse(500, 120, 80, 80);
+    fireflies.forEach(f => { f.update(); f.draw(); });
+  }
+
+  if (isRaining && !isUpsideDown) {
+    for (let r of rainDrops) { r.update(); r.draw(); }
+  }
+
+  pop();
+
+  flipAngle = lerp(flipAngle, targetAngle, 0.08);
+
+   drawUI();
+}
+
+function drawUI() {
+  push();
+  resetMatrix(); 
+  textAlign(LEFT, TOP);
+  noStroke();
+
+  const base = min(windowWidth, windowHeight);
+  const txtSize = max(14, base * 0.02);
+  textSize(txtSize);
+
+  fill(255);
+
+  if (!isUpsideDown) {
+    text("Press T to switch Day / Night", 20, 20);
+    text("Click the trunk to enter UpsideDown World", 20, 20 + txtSize + 8);
+  } else {
+    text("Click the trunk to return to normal world", 20, 20);
+    text("Smoke button: toggle creepy fog", 20, 20 + txtSize + 8);
+  }
+
 
   for (let i = 0; i < 6; i++){
     fill(colors[i]);
