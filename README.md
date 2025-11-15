@@ -7,7 +7,7 @@ This project is adapted from the collaborative apple-tree base code created by m
 This project is an interactive, animated apple-tree environment that transforms between two parallel worlds:  
 a bright and lively day/night world, and an unsettling, corrupted “UpsideDown” world inspired by the TV series **Stranger Things**.
 
-![Image 1](./librariesImages/IMG_4740.jpg)
+![Image 1](./libraries/IMG_4740.jpg)
 
 # How to Interact with the Work
 
@@ -79,10 +79,10 @@ Use your **mouse** and **keyboard** to interact with the scene.
 ## ▶ Apple Behavior
 
 ### Normal World  
-`waiting → falling → landing → reset → repeat`
+waiting → falling → landing → reset → repeat
 
 ### UpsideDown World  
-`waiting → rising upward → floating → returning to branch → repeat`
+waiting → rising upward → floating → returning to branch → repeat
 
 This creates a **unique anti-gravity animation** in the inverted world.
 
