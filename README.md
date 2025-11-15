@@ -14,13 +14,9 @@ a bright and lively day/night world, and an unsettling, corrupted “UpsideDown�
 This project contains **two different worlds** that you can switch between.  
 Interaction is done through **mouse clicks** and **keyboard input**.
 
----
-
 ###  Start
 When the page loads, the animation begins automatically.  
 Use your **mouse** and **keyboard** to interact with the scene.
-
----
 
 ### Day / Night Toggle (Normal World Only)
 
@@ -29,8 +25,6 @@ Use your **mouse** and **keyboard** to interact with the scene.
 
 **Day:** blue sky, green leaves sway, apples fall slowly  
 **Night:** dark blue sky, moon appears, leaves grow from small to large, fireflies appear
-
----
 
 ###  Rain (Rain ☔ Button)
 
@@ -44,8 +38,6 @@ Use your **mouse** and **keyboard** to interact with the scene.
   - Rain is **not drawn**
   - Leaves **continue falling** (they turn black)
 
----
-
 ### Leaf Behavior
 
 - **Normal Day:** green leaves gently sway  
@@ -53,8 +45,6 @@ Use your **mouse** and **keyboard** to interact with the scene.
 - **Normal Day/Night + Rain:** leaves fall downward  
 - **UpsideDown World (entered from Day):** leaves turn **black**, falling continues if triggered  
 - **UpsideDown World (entered from Night):** leaves shrink to **0** and disappear  
-
----
 
 ###  Entering / Exiting the UpsideDown World
 
@@ -74,8 +64,6 @@ Use your **mouse** and **keyboard** to interact with the scene.
 - All apples **reset** to their original positions  
 - Day/Night toggle and Rain effects work normally again  
 
----
-
 ###  Apple Behavior
 
 #### Normal World  
@@ -84,15 +72,11 @@ waiting → falling → landing → reset → repeat
 #### UpsideDown World  
 waiting → rising upward → floating → returning to branch → repeat
 
----
-
 ## My Individual Approach to Animating the Group Code
 
  In my version, users can click the tree trunk to flip between the normal world and the UpsideDown world, and can press T in the normal world to switch between day and night, while the animation is driven primarily by interaction (mouse clicks, key presses) and time-based progression (continuous frameCount-driven changes) together with Perlin-like randomness that gives the entire scene a gentle breathing motion, with animatable properties including the swaying of tree branches, the cyclical growth and falling of apples, the glowing apples at night, the drifting golden fireflies, variations in rainfall density, and the corrupted apples and drifting smoke that appear only in the UpsideDown world.
  
 Visually influenced by the iconic aesthetic cues of Stranger Things—the purple-black tones of the UpsideDown, the floating particles, and the ominous smoky atmosphere—I implemented a dynamically shifting cool-toned background, floating dark particles, and lightly trembling branches to evoke instability and eerie tension, and technically, using p5.js drawing functions and custom classes such as Segment, Apple, Firefly, RainDrop, and SmokeParticle, I constructed modular behaviors while separating world-space from screen-space coordinates to maintain stable UI scaling, applied translate-rotate easing for natural world-flip transitions, and integrated a scaleFactor resizing system to ensure that the entire scene preserves correct proportions and remains fully responsive across varying browser window sizes.
-
----
 
 ## Technical Explanation
 
@@ -104,13 +88,10 @@ Visually influenced by the iconic aesthetic cues of Stranger Things—the purple
 - Blackening of leaves in the upside-down world: if (isUpsideDown) fill(0); 
 - Dynamic background (time-driven): The RGB values are changed based on sin() / cos() to make the background pulse.
 
----
-
 ## The main modifications I made to the original group code 
 
 I expanded on the basic code, including: adding a complete "Inverted World" system, adding the Apple's four-stage loop behavior, adding an anti-gravity mechanism, leaves turning black in the alternate world, and adding a dark particle and smoke particle system.
 
----
-
 ## Tools and technique from outside the course
-I used ChatGPT as a supplemental debugging tool to resolve several technical issues，such as preventing the floating logic from affecting the normal world, fixing duplicated leaf rendering, correcting excessive apple acceleration under gravity, and addressing incorrect apple state transitions during world switching—thereby improving the overall stability and consistency of the animation system.
+
+The implementation of the floating animation effect and the button interaction system was generated with the assistance of ChatGPT, which also helped resolve several technical issues and improve the overall stability of the project, such as preventing the floating logic from affecting the normal world, fixing duplicated leaf rendering, correcting excessive apple acceleration under gravity, and addressing incorrect apple state transitions during world switching.
