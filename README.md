@@ -28,9 +28,9 @@ Use your **mouse** and **keyboard** to interact with the scene.
 **Day:** blue sky, green leaves sway, apples fall slowly  
 **Night:** dark blue sky, moon appears, leaves grow from small to large, fireflies appear
 
-###  Rain (Rain ☔ Button)
+###  Rain (Rain Button)
 
-- Click the **Rain ☔** button (top-right) to toggle rain.
+- Click the **Rain Button** (top-right) to toggle rain.
 - Rain is **only visible in the Normal World**.
 
 **Special behavior:**
@@ -78,7 +78,7 @@ waiting → rising upward → floating → returning to branch → repeat
 
  In my version, users can click the tree trunk to flip between the normal world and the UpsideDown world, and can press T in the normal world to switch between day and night, while the animation is driven primarily by interaction (mouse clicks, key presses) and time-based progression (continuous frameCount-driven changes) together with Perlin-like randomness that gives the entire scene a gentle breathing motion, with animatable properties including the swaying of tree branches, the cyclical growth and falling of apples, the glowing apples at night, the drifting golden fireflies, variations in rainfall density, and the corrupted apples and drifting smoke that appear only in the UpsideDown world.
  
-Visually influenced by the iconic aesthetic cues of Stranger Things—the purple-black tones of the UpsideDown, the floating particles, and the ominous smoky atmosphere—I implemented a dynamically shifting cool-toned background, floating dark particles, and lightly trembling branches to evoke instability and eerie tension, and technically, using p5.js drawing functions and custom classes such as Segment, Apple, Firefly, RainDrop, and SmokeParticle, I constructed modular behaviors while separating world-space from screen-space coordinates to maintain stable UI scaling, applied translate-rotate easing for natural world-flip transitions, and integrated a scaleFactor resizing system to ensure that the entire scene preserves correct proportions and remains fully responsive across varying browser window sizes.
+Visually influenced by the iconic aesthetic cues of Stranger Things; the purple and black tones of the UpsideDown, the floating particles, and the ominous smoky atmosphere. I implemented a dynamically shifting cold background, floating dark particles, and lightly trembling branches to evoke instability and eerie tension, and technically, using p5.js drawing functions and custom classes such as Segment, Apple, Firefly, RainDrop, and SmokeParticle, I constructed modular behaviors while separating world and space from screen and space coordinates to maintain stable UI scaling, applied translation and rotation easing for natural flip transitions, and integrated a scaleFactor resizing system to ensure that the entire scene preserves correct proportions and remains fully responsive across varying browser window sizes.
 
 ## Technical Explanation
 
@@ -92,7 +92,7 @@ Visually influenced by the iconic aesthetic cues of Stranger Things—the purple
 
 ## The main modifications I made to the original group code 
 
-I expanded on the basic code, including: adding a complete "Inverted World" system, adding the Apple's four-stage loop behavior, adding an anti-gravity mechanism, leaves turning black in the alternate world, and adding a dark particle and smoke particle system.
+I expanded on the basic code, including: adding a complete "Inverted World" system, adding the Apple's four stage loop behavior, adding an anti-gravity mechanism, leaves turning black in the alternate world, and adding a dark particle and smoke particle system.
 
 ## Tools and technique from outside the course
 

@@ -547,7 +547,7 @@ function drawUI() {
   fill(255);
   textAlign(CENTER, CENTER);
   textSize(txtSize);
-  text("Rain ☔", rainX + RAIN_BTN_W / 2, rainY + RAIN_BTN_H / 2);
+  text("Rain", rainX + RAIN_BTN_W / 2, rainY + RAIN_BTN_H / 2);
   // Smoke Button
   if (isUpsideDown) {
     let smokeX = 20;
@@ -556,7 +556,7 @@ function drawUI() {
     rect(smokeX, smokeY, SMOKE_BTN_W, SMOKE_BTN_H, 8);
     fill(255);
     textAlign(CENTER, CENTER);
-    text("Smoke ☁️", smokeX + SMOKE_BTN_W / 2, smokeY + SMOKE_BTN_H / 2);
+    text("Smoke", smokeX + SMOKE_BTN_W / 2, smokeY + SMOKE_BTN_H / 2);
   }
 
   pop();
