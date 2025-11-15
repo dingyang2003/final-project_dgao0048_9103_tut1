@@ -5,7 +5,9 @@ This project is adapted from the collaborative apple-tree base code created by m
 ## Interactive Apple Tree — Inspired by *Stranger Things*
 
 This project is an interactive, animated apple-tree environment that transforms between two parallel worlds:  
-a bright and lively day/night world, and an unsettling, corrupted “UpsideDown” world inspired by the TV series **Stranger Things**.
+a bright and lively day/night world, and an unsettling, corrupted “UpsideDown” world inspired by the TV series **Stranger Things** -- "An Otherworldly Abyss Beneath a Normal Town". The drama begins in the peaceful Hawkins town of the 1980s and gradually uncovers the hidden "Upside Down" beneath the town through the adventures of a group of children. 
+
+This strong contrast between "reality and the otherworld" is centered around an "interactive apple tree", creating two completely opposite spaces: the "positive bright world" and the "negative dark world". These two worlds seamlessly switch through the "scene flip" action and share the "apple tree" as a visual anchor to ensure the coherence of the narrative logic.
 
 ![Image 1](./libraries/IMG_4740.jpg)
 
