@@ -3,6 +3,7 @@ const DESIGN_H = 800;
 
 let branches = [];
 let apples = [];
+let leaves = []; 
 let fireflies = [];
 let darkParticles = [];
 let smokeParticles = [];
@@ -29,7 +30,76 @@ const RAIN_BTN_H = 40;
 const SMOKE_BTN_W = 150;
 const SMOKE_BTN_H = 40;
 
+// Leaf
+class Leaf {
+  constructor(x, y) {
+    this.startX = x;
+    this.startY = y;
+    this.x = x;
+    this.y = y;
 
+    this.baseSize = random(18, 26);
+    this.nightScale = 0;      
+    this.dayScale = 1;         
+
+    this.angle = random(TWO_PI);
+    this.swingSpeed = random(0.02, 0.04);
+    this.swingAmp = random(2, 4);
+
+    this.falling = false;
+    this.fallSpeed = random(1, 2);
+    this.xDrift = random(-0.5, 0.5);
+  }
+
+  update() {
+    if (!isNight && !this.falling) {
+      this.angle += this.swingSpeed;
+    }
+
+    if (isNight && !isUpsideDown && !this.falling) {
+      this.nightScale = lerp(this.nightScale, 1, 0.05);
+    } else {
+      this.nightScale = lerp(this.nightScale, 0, 0.05);
+    }
+
+    if (isRaining && !this.falling) {
+      this.falling = true;
+    }
+
+    if (this.falling) {
+      this.y += this.fallSpeed;
+      this.x += this.xDrift + sin(frameCount * 0.05) * 0.5;
+      this.fallSpeed += 0.05;
+
+      if (this.y > DESIGN_H + 30) {
+        this.falling = false;
+        this.y = this.startY;
+        this.x = this.startX;
+        this.fallSpeed = random(1, 2);
+      }
+    }
+  }
+
+  draw() {
+    push();
+    translate(this.x, this.y);
+
+    if (!this.falling) {
+      translate(sin(this.angle) * this.swingAmp, 0);
+    }
+
+    let scaleAmt = isNight ? this.nightScale : this.dayScale;
+    scale(scaleAmt);
+
+    fill(40, 160, 70); 
+    stroke(0);
+    strokeWeight(1.5);
+    ellipse(0, 0, this.baseSize, this.baseSize * 0.6);
+    pop();
+  }
+}
+
+//RainDrop
 class RainDrop {
   constructor() {
     this.x = random(0, DESIGN_W);
@@ -51,7 +121,7 @@ class RainDrop {
   }
 }
 
-
+//Segment
 class Segment {
   constructor(x, y, length, angle, level) {
     this.x = x;
@@ -87,7 +157,7 @@ class Segment {
   }
 }
 
-
+//Apple
 class Apple {
   constructor(x, y, color) {
     this.startX = x;
@@ -161,8 +231,7 @@ class Apple {
   }
 }
 
-
-
+//Firefly
 class Firefly {
   constructor() {
     this.x = random(50, DESIGN_W - 50);
@@ -180,7 +249,7 @@ class Firefly {
   }
 }
 
-
+//DarkParticle
 class DarkParticle {
   constructor() {
     this.x = random(0, DESIGN_W);
@@ -201,7 +270,7 @@ class DarkParticle {
   }
 }
 
-
+//SmokeParticle
 class SmokeParticle {
   constructor() {
     this.x = random(50, DESIGN_W - 50);
@@ -231,7 +300,7 @@ class SmokeParticle {
   }
 }
 
-
+//GenerateTree
 function generateTree(x, y, length, angle, level) {
   if (length < 40) return;
 
@@ -257,10 +326,19 @@ function generateTree(x, y, length, angle, level) {
     ));
   }
 
+if (level >= 3 && random() < 0.8) {
+    let t = random(0.2, 0.9);
+    leaves.push(new Leaf(
+      lerp(b.x, b.x2, t),
+      lerp(b.y, b.y2, t)
+    ));
+  }
+
   generateTree(endX, endY, length * 0.75, left, level + 1);
   generateTree(endX, endY, length * 0.75, right, level + 1);
 }
 
+//ExtraApple
 function addRandomApple() {
   if (branches.length === 0) return;
   let candidates = branches.filter(b => b.level >= 3);
@@ -279,7 +357,7 @@ function addRandomApple() {
   ));
 }
 
-
+//SetUp
 function setup() {
   createCanvas(windowWidth, windowHeight);
   calcScaleFactor();
@@ -298,7 +376,7 @@ function setup() {
   for (let i = 0; i < 80; i++) darkParticles.push(new DarkParticle());
 }
 
-
+//Draw
 function draw() {
   if (!isUpsideDown) {
     background(isNight ? color(20,30,60) : color(110,160,220));
@@ -353,11 +431,12 @@ function draw() {
   noStroke();
 
   branches.forEach(b => b.draw());
+  leaves.forEach(l => { l.update(); l.draw(); });
   apples.forEach(a => { a.update(); a.draw(); });
 
   if (!isUpsideDown && isNight) {
     fill(255,255,200,90);
-    ellipse(500, 120, 80, 80);
+    ellipse(580, 150, 100, 100);
     fireflies.forEach(f => { f.update(); f.draw(); });
   }
 
@@ -372,7 +451,7 @@ function draw() {
   drawUI();
 }
 
-
+//UI
 function drawUI() {
   push();
   resetMatrix(); 
@@ -415,7 +494,7 @@ function drawUI() {
   pop();
 }
 
-
+//Mouse
 function mousePressed() {
 
   let offsetX = (width / scaleFactor - DESIGN_W) / 2;
@@ -461,7 +540,7 @@ function mousePressed() {
   }
 }
 
-
+//KeyControl
 function keyPressed() {
   if (key === 'T' || key === 't') {
     if (!isUpsideDown) {
@@ -470,7 +549,7 @@ function keyPressed() {
   }
 }
 
-
+//Resize
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   calcScaleFactor();
