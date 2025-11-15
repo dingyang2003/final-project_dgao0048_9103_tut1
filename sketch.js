@@ -17,6 +17,8 @@ let isRaining = false;
 let isSmoke = false;
 
 let gravity = 0.2;
+let appleGravity = 0.06; 
+
 let gravityDirection = 1;
 let ground = 750;
 let topY = 20;
@@ -47,7 +49,7 @@ class Leaf {
     this.swingAmp = random(2, 4);
 
     this.falling = false;
-    this.fallSpeed = random(1, 2);
+    this.fallSpeed = random(0.3, 0.8);
     this.xDrift = random(-0.5, 0.5);
   }
 
@@ -69,13 +71,13 @@ class Leaf {
     if (this.falling) {
       this.y += this.fallSpeed;
       this.x += this.xDrift + sin(frameCount * 0.05) * 0.5;
-      this.fallSpeed += 0.05;
+      this.fallSpeed += 0.015;
 
       if (this.y > DESIGN_H + 30) {
         this.falling = false;
         this.y = this.startY;
         this.x = this.startX;
-        this.fallSpeed = random(1, 2);
+        this.fallSpeed = random(0.3, 0.7);
       }
     }
   }
@@ -91,10 +93,16 @@ class Leaf {
     let scaleAmt = isNight ? this.nightScale : this.dayScale;
     scale(scaleAmt);
 
-    fill(40, 160, 70); 
-    stroke(0);
-    strokeWeight(1.5);
-    ellipse(0, 0, this.baseSize, this.baseSize * 0.6);
+if (isUpsideDown) {
+    fill(0);               
+} else {
+    fill(40, 160, 70);     
+}
+
+stroke(0);
+strokeWeight(1.5);
+ellipse(0, 0, this.baseSize, this.baseSize * 0.6);
+
     pop();
   }
 }
@@ -167,7 +175,7 @@ class Apple {
     this.color = color;
 
     this.dropSpeed = 0;
-    this.state = "waiting"; 
+    this.state = "waiting";
     this.timer = 0;
 
     this.swayRate = random(1, 3);
@@ -184,11 +192,52 @@ class Apple {
   }
 
   update() {
+    if (isUpsideDown) {
+
+      if (this.state === "waiting") {
+        this.timer++;
+        if (this.timer > 60) {
+          this.state = "falling";
+          this.timer = 0;
+        }
+
+      } else if (this.state === "falling") {
+        let g = appleGravity * 0.25;   
+        this.dropSpeed -= g;          
+        this.y += this.dropSpeed;
+
+        if (this.y <= topY + 20) {
+          this.state = "floating";
+          this.timer = 0;
+        }
+
+      } else if (this.state === "floating") {
+        this.y += sin(frameCount * 0.05) * 0.5;
+        this.timer++;
+        if (this.timer > 80) {
+          this.state = "returning";
+          this.timer = 0;
+        }
+
+      } else if (this.state === "returning") {
+        this.x = lerp(this.x, this.startX, 0.02);
+        this.y = lerp(this.y, this.startY, 0.02);
+
+        if (dist(this.x, this.y, this.startX, this.startY) < 3) {
+          this.reset();
+        }
+      }
+
+      return;
+    }
+
     if (this.state === "waiting") {
       this.timer++;
       if (this.timer > 120) this.state = "falling";
+
     } else if (this.state === "falling") {
-      this.dropSpeed += gravity * gravityDirection;
+
+      this.dropSpeed += appleGravity * gravityDirection;
       this.y += this.dropSpeed;
 
       if (gravityDirection === 1 && this.y >= ground) {
@@ -198,6 +247,7 @@ class Apple {
         this.y = topY;
         this.state = "landed";
       }
+
     } else if (this.state === "landed") {
       this.timer++;
       if (this.timer > 120) this.reset();
@@ -205,13 +255,6 @@ class Apple {
   }
 
   draw() {
-    if (!isUpsideDown && isNight) {
-      drawingContext.shadowBlur = 25;
-      drawingContext.shadowColor = color(255, 220, 150);
-    } else {
-      drawingContext.shadowBlur = 0;
-    }
-
     if (isUpsideDown) {
       fill(140 + sin(frameCount * 0.15) * 20, 0, 100);
     } else {
@@ -222,7 +265,6 @@ class Apple {
 
     let dx = this.x;
     let dy = this.y;
-
     if (this.state === "waiting") {
       dx += sin(frameCount * this.swaySpeed + this.swayPhase) * this.swayRate;
     }
@@ -231,16 +273,17 @@ class Apple {
   }
 }
 
+
 //Firefly
 class Firefly {
   constructor() {
-    this.x = random(50, DESIGN_W - 50);
-    this.y = random(100, 600);
+    this.x = random(0, DESIGN_W);
+    this.y = random(50, DESIGN_H - 200);
     this.tw = random(0.02, 0.05);
   }
   update() {
     this.alpha = 150 + sin(frameCount * this.tw) * 100;
-    this.y += sin(frameCount * this.tw) * 0.3;
+    this.y += sin(frameCount * this.tw) * 0.6;
   }
   draw() {
     noStroke();
@@ -378,6 +421,7 @@ function setup() {
 
 //Draw
 function draw() {
+  //Background
   if (!isUpsideDown) {
     background(isNight ? color(20,30,60) : color(110,160,220));
   } else {
@@ -388,6 +432,7 @@ function draw() {
     background(r, g, b);
   }
 
+  //GrowApple Day
   if (!isNight && !isUpsideDown) {
     if (apples.length < 40) {
       addRandomApple();
@@ -403,6 +448,7 @@ function draw() {
   rotate(flipAngle);
   translate(-DESIGN_W / 2, -DESIGN_H / 2);
 
+  //Particles
   if (isUpsideDown) {
     for (let d of darkParticles) { d.update(); d.draw(); }
     if (isSmoke) {
@@ -410,11 +456,13 @@ function draw() {
     }
   }
 
+  //Noisepoints
   for (let p of noisePoints) {
     fill(isUpsideDown ? color(80,0,120,50) : p.c);
     rect(p.x, p.y, 100, 2);
   }
 
+  //Grass
   fill(isUpsideDown ? color(70,90,80) : color(40,140,90));
   rect(0, 650, 600, 100);
 
@@ -430,16 +478,25 @@ function draw() {
   rect(125, 625, 350, 75);
   noStroke();
 
+  //Segemnt
   branches.forEach(b => b.draw());
   leaves.forEach(l => { l.update(); l.draw(); });
   apples.forEach(a => { a.update(); a.draw(); });
 
+  //Moon
   if (!isUpsideDown && isNight) {
     fill(255,255,200,90);
-    ellipse(580, 150, 100, 100);
+    ellipse(540, 80, 80, 80);
     fireflies.forEach(f => { f.update(); f.draw(); });
   }
 
+  //Leaf
+  leaves.forEach(l => { l.update(); l.draw(); });
+
+  //Apple
+  apples.forEach(a => { a.update(); a.draw(); });
+
+  //Rain
   if (isRaining && !isUpsideDown) {
     for (let r of rainDrops) { r.update(); r.draw(); }
   }
@@ -504,8 +561,13 @@ function mousePressed() {
   let cy = mouseY / scaleFactor - offsetY;
 
   if (cx > 250 && cx < 350 && cy > 350 && cy < 650) {
+    let previous = isUpsideDown;     
     isUpsideDown = !isUpsideDown;
     targetAngle = isUpsideDown ? PI : 0;
+
+     if (previous === true && isUpsideDown === false) {
+      for (let a of apples) a.reset();
+    }
   }
 
   let rainX = width - RAIN_BTN_W - 20;
