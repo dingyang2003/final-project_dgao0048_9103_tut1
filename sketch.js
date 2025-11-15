@@ -1,9 +1,11 @@
 const DESIGN_W = 600;
 const DESIGN_H = 800;
 
+// Components of Tree
 let branches = [];
 let apples = [];
 let leaves = []; 
+// Effect
 let fireflies = [];
 let darkParticles = [];
 let smokeParticles = [];
@@ -11,6 +13,7 @@ let rainDrops = [];
 
 let noisePoints = [];
 
+// Control
 let isNight = false;
 let isUpsideDown = false;
 let isRaining = false;
@@ -23,10 +26,12 @@ let gravityDirection = 1;
 let ground = 750;
 let topY = 20;
 
+// Adaptive Scaling
 let scaleFactor;
 let flipAngle = 0;
 let targetAngle = 0;
 
+// UI Button
 const RAIN_BTN_W = 120;
 const RAIN_BTN_H = 40;
 const SMOKE_BTN_W = 150;
@@ -41,38 +46,41 @@ class Leaf {
     this.y = y;
 
     this.baseSize = random(18, 26);
+
+    // Night 
     this.nightScale = 0;      
     this.dayScale = 1;         
-
+    // Day 
     this.angle = random(TWO_PI);
     this.swingSpeed = random(0.02, 0.04);
     this.swingAmp = random(2, 4);
-
+    // Leaves Failing
     this.falling = false;
-    this.fallSpeed = random(0.3, 0.8);
-    this.xDrift = random(-0.5, 0.5);
+    this.fallSpeed = random(0.3, 0.8); // Leaves fall more slowly than apples.
+    this.xDrift = random(-0.5, 0.5); // Sway
   }
 
   update() {
+    // Day
     if (!isNight && !this.falling) {
       this.angle += this.swingSpeed;
     }
-
+    // Night
     if (isNight && !isUpsideDown && !this.falling) {
       this.nightScale = lerp(this.nightScale, 1, 0.05);
     } else {
       this.nightScale = lerp(this.nightScale, 0, 0.05);
     }
-
+    // The rain triggers the falling of leaves.
     if (isRaining && !this.falling) {
       this.falling = true;
     }
-
+    // Falling
     if (this.falling) {
       this.y += this.fallSpeed;
       this.x += this.xDrift + sin(frameCount * 0.05) * 0.5;
-      this.fallSpeed += 0.015;
-
+      this.fallSpeed += 0.015; // The leaves gently accelerate.
+    // Falling off the screen and back onto the tree.
       if (this.y > DESIGN_H + 30) {
         this.falling = false;
         this.y = this.startY;
@@ -85,14 +93,14 @@ class Leaf {
   draw() {
     push();
     translate(this.x, this.y);
-
+    //Day
     if (!this.falling) {
       translate(sin(this.angle) * this.swingAmp, 0);
     }
-
+    // Night
     let scaleAmt = isNight ? this.nightScale : this.dayScale;
     scale(scaleAmt);
-
+    // In the upsidedown world the leaves turn black.
 if (isUpsideDown) {
     fill(0);               
 } else {
@@ -138,9 +146,9 @@ class Segment {
     this.level = level;
 
     this.angle = angle + random(-0.15, 0.15);
-
+    // The thickness of the branches varies with the grade.
     this.thickness = [0, 15, 10, 7, 5][level] || 4;
-
+    // Upsidedown World Swing Effect
     this.swayAmp = random(1, 2);
     this.swaySpeed = random(0.15, 0.2);
 
@@ -153,7 +161,7 @@ class Segment {
     strokeWeight(this.thickness);
 
     let sway = 0;
-
+    // Upsidedown World: A Glimmer of Branches Swinging
     if (isUpsideDown) {
       sway = sin(frameCount * this.swaySpeed + this.y * 0.08) * this.swayAmp;
     }
@@ -177,7 +185,7 @@ class Apple {
     this.dropSpeed = 0;
     this.state = "waiting";
     this.timer = 0;
-
+    // Slight swing before falling
     this.swayRate = random(1, 3);
     this.swaySpeed = random(0.5, 0.3);
     this.swayPhase = random(0, TWO_PI);
@@ -192,25 +200,26 @@ class Apple {
   }
 
   update() {
+    // Upsidedown World Apple Physics
     if (isUpsideDown) {
-
+      // Stay briefly on the tree.
       if (this.state === "waiting") {
         this.timer++;
         if (this.timer > 60) {
           this.state = "falling";
           this.timer = 0;
         }
-
+      // Apples Fall "Upward"
       } else if (this.state === "falling") {
         let g = appleGravity * 0.25;   
-        this.dropSpeed -= g;          
+        this.dropSpeed -= g;   // Accelerate       
         this.y += this.dropSpeed;
 
         if (this.y <= topY + 20) {
           this.state = "floating";
           this.timer = 0;
         }
-
+      // Floating
       } else if (this.state === "floating") {
         this.y += sin(frameCount * 0.05) * 0.5;
         this.timer++;
@@ -218,7 +227,7 @@ class Apple {
           this.state = "returning";
           this.timer = 0;
         }
-
+      // Back to tree
       } else if (this.state === "returning") {
         this.x = lerp(this.x, this.startX, 0.02);
         this.y = lerp(this.y, this.startY, 0.02);
@@ -230,16 +239,16 @@ class Apple {
 
       return;
     }
-
+     // Normal World Apple Physics
     if (this.state === "waiting") {
       this.timer++;
       if (this.timer > 120) this.state = "falling";
 
     } else if (this.state === "falling") {
-
+      // Down
       this.dropSpeed += appleGravity * gravityDirection;
       this.y += this.dropSpeed;
-
+      // Land
       if (gravityDirection === 1 && this.y >= ground) {
         this.y = ground;
         this.state = "landed";
@@ -255,6 +264,7 @@ class Apple {
   }
 
   draw() {
+    // Apples become purple
     if (isUpsideDown) {
       fill(140 + sin(frameCount * 0.15) * 20, 0, 100);
     } else {
@@ -272,7 +282,6 @@ class Apple {
     ellipse(dx, dy, 40, 40);
   }
 }
-
 
 //Firefly
 class Firefly {
@@ -325,11 +334,12 @@ class SmokeParticle {
   }
 
   update() {
-    this.y -= this.speed;
+    this.y -= this.speed; // up
     this.x += this.xSpeed;
     this.alpha -= 0.2;
 
     if (this.alpha <= 0) {
+      // The smoke vanished and then reappeared.
       this.x = random(50, DESIGN_W - 50);
       this.y = random(650, 750);
       this.alpha = random(50, 100);
@@ -356,7 +366,7 @@ function generateTree(x, y, length, angle, level) {
   let offset = level === 1 ? radians(25) : radians(35);
   let left = angle + offset;
   let right = angle - offset;
-
+  // Generate Apples
   if (level >= 3 && random() < 0.3) {
     apples.push(new Apple(
       lerp(b.x, b.x2, random(0.3, 0.9)),
@@ -368,8 +378,8 @@ function generateTree(x, y, length, angle, level) {
       ])
     ));
   }
-
-if (level >= 3 && random() < 0.8) {
+  // Generate leaves
+  if (level >= 3 && random() < 0.8) {
     let t = random(0.2, 0.9);
     leaves.push(new Leaf(
       lerp(b.x, b.x2, t),
@@ -404,7 +414,7 @@ function addRandomApple() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   calcScaleFactor();
-
+  // Background NoisePoints
   for (let i = 0; i < 800; i++) {
     noisePoints.push({
       x: random(-800, DESIGN_W + 800),
@@ -412,9 +422,9 @@ function setup() {
       c: [random(100,180), random(150,200), random(200,255), random(80,150)]
     });
   }
-
+  // Tree
   generateTree(300, 650, 200, PI / 2, 1);
-
+  // Firefly and particles
   for (let i = 0; i < 40; i++) fireflies.push(new Firefly());
   for (let i = 0; i < 80; i++) darkParticles.push(new DarkParticle());
 }
@@ -425,6 +435,7 @@ function draw() {
   if (!isUpsideDown) {
     background(isNight ? color(20,30,60) : color(110,160,220));
   } else {
+    // Upsidedown background
     let t = frameCount * 0.01;
     let r = 25 + sin(t) * 20;
     let g = 10 + sin(t * 1.3) * 10;
@@ -443,7 +454,7 @@ function draw() {
   scale(scaleFactor);
   translate((width / scaleFactor - DESIGN_W) / 2,
             (height / scaleFactor - DESIGN_H) / 2);
-
+  // The world spins.
   translate(DESIGN_W / 2, DESIGN_H / 2);
   rotate(flipAngle);
   translate(-DESIGN_W / 2, -DESIGN_H / 2);
@@ -528,7 +539,7 @@ function drawUI() {
     text("Click the trunk to return to normal world", 20, 20);
     text("Smoke button: toggle creepy fog", 20, 20 + txtSize + 8);
   }
-
+  // Rain Button
   let rainX = width - RAIN_BTN_W - 20;
   let rainY = 20;
   fill(0, 0, 0, 140);
@@ -537,7 +548,7 @@ function drawUI() {
   textAlign(CENTER, CENTER);
   textSize(txtSize);
   text("Rain ☔", rainX + RAIN_BTN_W / 2, rainY + RAIN_BTN_H / 2);
-
+  // Smoke Button
   if (isUpsideDown) {
     let smokeX = 20;
     let smokeY = 20 + (txtSize + 8) * 2;
